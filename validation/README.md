@@ -1,7 +1,35 @@
-# Octavian validation harness
+# Compare Octavian and Orekit
 
-`validate_octavian.py` is intentionally outside `src/actium`. Only validation bridge scripts import Octavian, keeping the installable
+The comparison scripts are outside `src/actium`. Only validation bridge scripts import Octavian, keeping the installable
 reference implementation independent.
+
+Start with the sequential Python scripts below. Each defines shared inputs,
+propagates with Octavian and Orekit, and plots the overlapping orbits alongside
+position and velocity differences. CSV files preserve both trajectories and
+signed differences. Edit the settings near the top; no arguments are required.
+Install both projects in the same environment using the
+[setup guide](../README.md#octavian-validation).
+
+```bash
+python validation/validate_octavian.py
+python validation/validate_perturbations.py
+python validation/validate_spherical_harmonics.py
+```
+
+Two-body propagation needs no external data. Sun/Moon comparisons require the
+Orekit data package. The harmonic comparison independently reads Octavian's
+bundled EGM2008 coefficients; select degree and order in the script. It requires
+Octavian 0.4.18 or the `agent/readable-gravity-workflows` branch.
+
+The plots demonstrate agreement under matched assumptions. The initial state,
+units, frame, constants, and forces must match. Small trajectory differences
+also depend on integrator tolerances; same-state force comparisons isolate the
+dynamics from those integration errors.
+
+## Detailed regression campaigns
+
+The multi-case checks, force diagnostics, convergence sweeps, and machine-readable
+reports remain in `validation/regression/`, with the acceptance gates below.
 
 The harness uses:
 
@@ -14,7 +42,7 @@ The harness uses:
 Run all representative cases:
 
 ```bash
-python validation/validate_octavian.py \
+python validation/regression/two_body.py \
   --octavian-path ../octavian \
   --details-csv validation/results/two_body_differences.csv
 ```
@@ -42,7 +70,7 @@ Actium provides explicit Orekit J2 and solar/lunar third-body propagators. Run
 the independent Octavian checks and create state/acceleration error plots with:
 
 ```bash
-python validation/validate_perturbations.py \
+python validation/regression/perturbations.py \
   --octavian-path ../octavian \
   --output-dir validation/results/perturbations
 ```
@@ -85,13 +113,13 @@ the Octavian maximum step is reduced from 5 s to 1 s.
 
 ## EGM2008 spherical harmonics
 
-`validate_spherical_harmonics.py` is a plain Python bridge with editable settings
+`regression/spherical_harmonics.py` is a plain Python bridge with editable settings
 and no CLI arguments. Run it in an environment containing Actium, Octavian/ASSET,
 matplotlib and Java. The default checkout path is the sibling `../octavian`. See the
 [setup guide](../README.md#octavian-validation) for dependencies.
 
 ```bash
-python validation/validate_spherical_harmonics.py
+python validation/regression/spherical_harmonics.py
 ```
 
 Orekit's ICGEM reader loads the packaged NGA EGM2008 subset independently of
