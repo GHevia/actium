@@ -147,34 +147,27 @@ python -m pip install -e ../octavian
 
 Spherical-harmonic validation requires an Octavian version providing
 `SphericalHarmonics.earth()` and its compiled backend. Until that feature reaches
-Octavian's default branch, select `agent/earth-gravity-database` in the Octavian
+Octavian's default branch, select `agent/readable-gravity-workflows` in the Octavian
 checkout and follow its native build instructions. Compatible published wheels
 include the native backend. The reference package itself requires neither ASSET
 nor Octavian.
 
-Two-body checks:
+Run the introductory comparisons:
 
 ```bash
-python validation/validate_octavian.py \
-  --octavian-path ../octavian \
-  --details-csv validation/results/two_body_differences.csv
+python validation/validate_octavian.py
+python validation/validate_perturbations.py
+python validation/validate_spherical_harmonics.py
 ```
 
-J2, Sun, Moon, and combined Sun/Moon checks with error plots:
+Each script shows shared inputs, Octavian propagation, Orekit propagation, and
+plotted differences in sequence. Settings are ordinary Python variables.
+The independent reference implementation remains in `src/actium`; reusable CSV
+and plot code lives in `validation/_report.py`.
 
-```bash
-python validation/validate_perturbations.py \
-  --octavian-path ../octavian \
-  --output-dir validation/results/perturbations
-```
-
-The perturbation harness always writes full CSV and PNG artifacts before
-returning nonzero if a tolerance fails. J2 is validated in EME2000; Sun/Moon
-are validated in Orekit's `TOD/1996 simple EOP` frame to match Octavian's
-`ECI_TOD` ephemerides. It compares forces at identical spacecraft states with
-native ephemerides, then again at shared Orekit body positions, separating
-force-equation differences from native ephemeris differences. See
-[`validation/README.md`](validation/README.md) for the report contract.
+Detailed sweeps and ephemeris diagnostics remain in `validation/regression/`.
+See [the validation guide](validation/README.md) for frames, assumptions,
+acceptance gates, and recorded results.
 
 ## Development and publishing
 
@@ -204,6 +197,7 @@ Run the plain Python bridge with settings defined in the script:
 python validation/validate_spherical_harmonics.py
 ```
 
-It uses the sibling Octavian checkout's packaged NGA EGM2008 file, independently
+It uses the installed Octavian package's NGA EGM2008 file, independently
 reads it in each implementation, and compares forces and six-hour trajectories
-at 20×20, 100×100, and 200×200. See [the validation guide](validation/README.md) for setup and recorded results.
+at the selected degree and order. The detailed campaign additionally covers
+20×20, 100×100, and 200×200 across two orbits and two integration settings. See [the validation guide](validation/README.md) for setup and recorded results.
