@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "actium"
+version = "0.3.0"
+description = "A small Orekit reference propagator for independent trajectory validation."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Actium Contributors" }]
+keywords = ["astrodynamics", "orekit", "orbit-propagation", "validation"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+  "numpy>=1.23",
+  "orekit-jpype>=13.1.7,<14",
+]
+
+[project.urls]
+Repository = "https://github.com/GHevia/actium"
+Issues = "https://github.com/GHevia/actium/issues"
+Documentation = "https://github.com/GHevia/actium/blob/main/validation/README.md"
+
+[project.optional-dependencies]
+jdk = ["jdk4py>=21"]
+dev = [
+  "build>=1.2",
+  "matplotlib>=3.8",
+  "pytest>=7.4",
+  "ruff>=0.6",
+  "twine>=5.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/actium"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]

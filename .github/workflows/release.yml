@@ -1,0 +1,56 @@
+name: Release to PyPI
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install build and test dependencies
+        run: python -m pip install -e ".[dev,jdk]"
+      - name: Install Orekit data for Sun/Moon tests
+        run: >-
+          python -m pip install
+          "git+https://gitlab.orekit.org/orekit/orekit-data.git@baf158744d38ec76cf94e2d396280d545b9f0ba2"
+      - name: Verify tag matches package version
+        run: |
+          ACTIUM_VERSION="$(python -c 'import actium; print(actium.__version__)')"
+          test "$GITHUB_REF_NAME" = "v$ACTIUM_VERSION"
+      - name: Test and lint
+        run: |
+          python -m pytest
+          python -m ruff check .
+      - name: Build distributions
+        run: python -m build
+      - name: Check distributions
+        run: python -m twine check dist/*
+      - uses: actions/upload-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
