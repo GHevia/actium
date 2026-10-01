@@ -48,11 +48,17 @@ def report_comparison(octavian, orekit, output, *, title):
         comments="",
     )
     figure = plt.figure(figsize=(11, 7), layout="constrained")
-    grid = figure.add_gridspec(2, 2)
+    grid = figure.add_gridspec(2, 2, wspace=0.25)
     orbit = figure.add_subplot(grid[:, 0], projection="3d")
     for history, label, style in ((octavian, "Octavian", "-"), (orekit, "Orekit", "--")):
         orbit.plot(*history.positions_km.T, style, label=label)
     orbit.set(xlabel="X [km]", ylabel="Y [km]", zlabel="Z [km]", title="Trajectories")
+    limit_km = max(
+        np.linalg.norm(octavian.positions_km, axis=1).max(),
+        np.linalg.norm(orekit.positions_km, axis=1).max(),
+    )
+    orbit.set(xlim=(-limit_km, limit_km), ylim=(-limit_km, limit_km), zlim=(-limit_km, limit_km))
+    orbit.set_box_aspect((1, 1, 1))
     orbit.legend()
     for row, error, label in (
         (0, difference.position_error_norm_m, "Position difference [m]"),
